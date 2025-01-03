@@ -92,12 +92,13 @@ public class CustomClient {
 
 
     public List<Location> findReference(String filePath,int line ,int character){
+        log.info("find reference parameter：{}",filePath);
         ReferenceParams referenceParams = createReferenceParams(filePath,new Position(line,character));
         CompletableFuture<List<? extends Location>> completableFuture = server.getTextDocumentService().references(referenceParams);
         try {
             List<? extends Location> result = completableFuture.get(5000, TimeUnit.MILLISECONDS);
             List<Location> locations = (List<Location>) result;
-            log.info("find reference：{}", JSONObject.toJSONString(locations));
+            log.info("find reference result：{}", JSONObject.toJSONString(locations));
             return locations;
         }catch (Exception e){
             log.error("findReference error",e);
