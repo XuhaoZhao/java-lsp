@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty scope="context" name="system" source="spring.application.name" defaultValue="Unknow" />
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter" />
+    <property name="logback.logdir" value="./logs/${system}"/>
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <!--展示格式 layout-->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>
+                <pattern>%d{MM/dd HH:mm:ss.SSS} %clr([%thread]) [%X{token},%X{traceId}] %clr(%-5level) %clr(%-40.40logger{39}){cyan} - %msg%n</pattern>
+            </pattern>
+        </layout>
+    </appender>
+
+    <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <File>${logback.logdir}/file.log</File>
+        <!--滚动策略，按照时间滚动 TimeBasedRollingPolicy-->
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--文件路径,定义了日志的切分方式——把每一天的日志归档到一个文件中,以防止日志填满整个磁盘空间-->
+            <FileNamePattern>${logback.logdir}/history/file.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+            <!--只保留最近30天的日志-->
+            <maxHistory>30</maxHistory>
+            <!--用来指定日志文件的上限大小，那么到了这个值，就会删除旧的日志-->
+            <!--<totalSizeCap>1GB</totalSizeCap>-->
+            <!--文件切割大小,达到此大小后文件将被切割-->
+            <maxFileSize>200MB</maxFileSize>
+        </rollingPolicy>
+        <!--日志输出编码格式化-->
+        <encoder>
+            <charset>UTF-8</charset>
+            <pattern>%d{MM/dd HH:mm:ss.SSS} [%thread] [%X{token},%X{traceId}] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <springProfile name="default,dev">
+        <root level="INFO">
+            <appender-ref ref="Console" />
+            <appender-ref ref="file" />
+        </root>
+    </springProfile>
+</configuration>
