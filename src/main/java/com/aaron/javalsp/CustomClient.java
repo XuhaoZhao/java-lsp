@@ -96,7 +96,7 @@ public class CustomClient {
         ReferenceParams referenceParams = createReferenceParams(filePath,new Position(line,character));
         CompletableFuture<List<? extends Location>> completableFuture = server.getTextDocumentService().references(referenceParams);
         try {
-            List<? extends Location> result = completableFuture.get(5000, TimeUnit.MILLISECONDS);
+            List<? extends Location> result = completableFuture.get(10000, TimeUnit.MILLISECONDS);
             List<Location> locations = (List<Location>) result;
             log.info("find reference result：{}", JSONObject.toJSONString(locations));
             return locations;
