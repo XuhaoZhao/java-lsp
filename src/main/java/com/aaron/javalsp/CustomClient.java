@@ -2,15 +2,14 @@ package com.aaron.javalsp;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.JsonObject;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.annotation.PreDestroy;
+
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -19,20 +18,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.*;
 
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 
-@Service
+
 public class CustomClient {
 
     private static final Logger log = LoggerFactory.getLogger(CustomClient.class);
     private Launcher<LanguageServer> clientLauncher;
+
+    private LanguageServer server;
 
     private  OutputStream stdout;
     private InputStream stdin;
@@ -45,7 +44,7 @@ public class CustomClient {
         // 使用 LSP4J 的 Launcher 创建客户端与服务端的连接
         clientLauncher = Launcher.createLauncher(client, LanguageServer.class, stdin, stdout);
         // 启动客户端监听
-        LanguageServer server = clientLauncher.getRemoteProxy();
+        server = clientLauncher.getRemoteProxy();
         Future<Void> startListening = clientLauncher.startListening();
         // 初始化请求
         InitializeParams initParams = new InitializeParams();
@@ -84,16 +83,25 @@ public class CustomClient {
                 List<Location> locations = (List<Location>) result;
                 log.info("find reference：{}", JSONObject.toJSONString(locations));
             });
-
-            while (true){
-                Thread.sleep(10000);
-                System.out.println("running");
-            }
         }catch (Exception e){
             log.error("error",e);
         }
 
     }
+
+
+    public List<Location> findReference(String filePath,int line ,int character){
+        ReferenceParams referenceParams = createReferenceParams(filePath,new Position(line,character));
+        CompletableFuture<List<? extends Location>> completableFuture = server.getTextDocumentService().references(referenceParams);
+        try {
+            List<? extends Location> result = completableFuture.get(5000, TimeUnit.MILLISECONDS);
+            return  (List<Location>) result;
+        }catch (Exception e){
+            log.error("findReference error",e);
+        }
+        return Collections.emptyList();
+    }
+
     public ClientCapabilities getCapabilities() {
         ClientCapabilities capabilities = new ClientCapabilities();
 
@@ -198,12 +206,23 @@ public class CustomClient {
 //            }
 //            int exitCode = process.waitFor();  // 阻塞，直到子进程退出
 //            System.out.println("子进程的退出状态码：" + exitCode);
-            System.out.println("id:" + process.pid());
+            log.info("jdtls start successfully pid is {}",process.pid());
             this.stdin = process.getInputStream();
             this.stdout = process.getOutputStream();
         }catch (Exception e){
             System.out.println("error");
         }
 
+    }
+
+    @PreDestroy
+    public void cleanup() {
+        // 清理资源，例如关闭连接、停止子进程等
+        if (process != null) {
+            process.destroy();
+            log.info("Process terminated successfully.");
+        }
+        log.info("Cleaning up resources in CustomClient");
+        // 释放资源代码
     }
 }

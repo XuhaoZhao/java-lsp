@@ -41,3 +41,5 @@ RUN apt-get update && \
 # Add jdtls to PATH
 ENV PATH="/opt/jdtls/bin:${PATH}"
 EXPOSE 8080
+COPY target/java-lsp-*.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
