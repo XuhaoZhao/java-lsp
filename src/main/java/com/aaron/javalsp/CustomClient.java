@@ -59,13 +59,13 @@ public class CustomClient {
         Map<String,Object> impo = new HashMap<>();
         Map<String,Object> gradle = new HashMap<>();
 
-        gradle.put("enabled","true");
+        gradle.put("enabled","false");
         impo.put("gradle",gradle);
         java.put("import",impo);
         settings.put("java",java);
         initializationOptions.put("settings",settings);
 
-//        initParams.setInitializationOptions(initializationOptions);
+        initParams.setInitializationOptions(initializationOptions);
 
         CompletableFuture<InitializeResult> initialize = server.initialize(initParams);
         initialize.thenAccept(result -> {
