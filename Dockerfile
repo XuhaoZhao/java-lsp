@@ -1,8 +1,6 @@
 FROM ubuntu:22.04
 
 WORKDIR /usr/src/app
-
-RUN apt-get update && apt-get install -y curl
 # Install runtime and development dependencies, Python, Node.js, and npm
 RUN apt-get update && apt-get install \
     -y --no-install-recommends \
@@ -11,9 +9,6 @@ RUN apt-get update && apt-get install \
     libssl3 \
     ca-certificates \
     git \
-    python3 \
-    python3-pip \
-    python3-venv \
     curl \
     clangd \
     build-essential \
@@ -41,5 +36,6 @@ RUN apt-get update && \
 # Add jdtls to PATH
 ENV PATH="/opt/jdtls/bin:${PATH}"
 EXPOSE 8080
-COPY target/java-lsp-*.jar app.jar
+COPY target/java-lsp-0.0.1-SNAPSHOT.jar app.jar
+
 ENTRYPOINT ["java", "-jar", "app.jar"]

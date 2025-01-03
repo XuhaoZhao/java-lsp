@@ -49,7 +49,8 @@ public class CustomClient {
         // 初始化请求
         InitializeParams initParams = new InitializeParams();
 //        initParams.setProcessId(ProcessHandle.current().pid());
-        initParams.setRootUri("file:///Users/zxh/code-repo/xxl-job"); // 项目根目录
+//        initParams.setRootUri("file:///Users/zxh/code-repo/xxl-job"); // 项目根目录
+        initParams.setRootUri("file:///mnt/workspace"); // 项目根目录
         initParams.setCapabilities(getCapabilities());
 
         Map<String,Object> initializationOptions = new HashMap<>();
@@ -168,7 +169,7 @@ public class CustomClient {
         return referenceParams;
     }
     void startProcess(){
-        Path workspaceDir = Paths.get("/Users/zxh/code-repo/jdtls_dir/jdtls_workspace");
+        Path workspaceDir = Paths.get("/usr/src/app/jdtls_workspace");
         try{
             Files.createDirectories(workspaceDir);
             Files.setPosixFilePermissions(workspaceDir, PosixFilePermissions.fromString("rwxrwxrwx"));
@@ -186,9 +187,9 @@ public class CustomClient {
                     "--add-opens",
                     "java.base/java.lang=ALL-UNNAMED",
                     "-jar",
-                    "/Users/zxh/code-repo/jdtls_dir/jdtls/plugins/org.eclipse.equinox.launcher_1.6.900.v20240613-2009.jar",
+                    "/opt/jdtls/plugins/org.eclipse.equinox.launcher_1.6.900.v20240613-2009.jar",
                     "-configuration",
-                    "/Users/zxh/code-repo/jdtls_dir/jdtls/config_mac",
+                    "/opt/jdtls/config_linux",
                     "-data",
                     workspaceDir.toString()
             );
